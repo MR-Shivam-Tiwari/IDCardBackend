@@ -79,11 +79,33 @@ router.get('/', async (req, res) => {
     }
 });
 
+// PATCH endpoint to archive a participant by ID
+router.patch('/archive/:id', async (req, res) => {
+    const updates = { archive: true }; // Set archive to true to archive the participant
+
+    try {
+        const participant = await Participant.findByIdAndUpdate(
+            req.params.id,
+            { $set: updates },
+            { new: true }
+        );
+
+        if (!participant) {
+            return res.status(404).send({ message: "Participant not found" });
+        }
+
+        res.status(200).send(participant);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+});
+
+
 router.get('/event/:eventId', async (req, res) => {
     const eventId = req.params.eventId;
 
     try {
-        const participants = await Participant.find({ eventId }); // Filter participants by eventId
+        const participants = await Participant.find({ eventId, archive: false }); // Filter participants by eventId and archive status
         res.status(200).send(participants);
     } catch (error) {
         res.status(500).send(error);

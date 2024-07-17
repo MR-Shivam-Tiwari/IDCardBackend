@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
+const Participant = require('../models/participant');
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -31,15 +32,60 @@ router.post('/', async (req, res) => {
 
 
 // GET route to fetch all events
-router.get('/', async (req, res) => {
+router.get('/allevent', async (req, res) => {
     try {
         const events = await Event.find();
-        res.json(events);
+
+        // Create an array to hold promises for counting participants
+        const eventsWithCounts = await Promise.all(events.map(async (event) => {
+            const participantCount = await Participant.countDocuments({ eventId: event._id });
+            return {
+                ...event.toObject(),
+                participantCount // Add participant count to the event
+            };
+        }));
+
+        res.json(eventsWithCounts);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
+router.get('/', async (req, res) => {
+    try {
+        const events = await Event.find({ archive: false });
 
+        // Create an array to hold promises for counting participants
+        const eventsWithCounts = await Promise.all(events.map(async (event) => {
+            const participantCount = await Participant.countDocuments({ eventId: event._id });
+            return {
+                ...event.toObject(),
+                participantCount // Add participant count to the event
+            };
+        }));
+
+        res.json(eventsWithCounts);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+router.get('/archiveevent', async (req, res) => {
+    try {
+        const events = await Event.find({ archive: true });
+
+        // Create an array to hold promises for counting participants
+        const eventsWithCounts = await Promise.all(events.map(async (event) => {
+            const participantCount = await Participant.countDocuments({ eventId: event._id });
+            return {
+                ...event.toObject(),
+                participantCount // Add participant count to the event
+            };
+        }));
+
+        res.json(eventsWithCounts);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 // GET route to fetch a specific event by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -70,6 +116,26 @@ router.patch('/:id', async (req, res) => {
     }
 });
 
+// PATCH route to archive or unarchive an event by ID
+router.patch('/archive/:id', async (req, res) => {
+    try {
+        const { archive } = req.body;
+
+        const updatedEvent = await Event.findByIdAndUpdate(
+            req.params.id,
+            { archive },
+            { new: true }
+        );
+
+        if (!updatedEvent) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        res.json(updatedEvent);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
 // DELETE route to delete an event by ID
 router.delete('/:id', async (req, res) => {
     try {

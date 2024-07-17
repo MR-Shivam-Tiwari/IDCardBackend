@@ -10,7 +10,8 @@ const participantSchema = new mongoose.Schema({
     backgroundImage: { type: String, required: true },
     profilePicture: { type: String, required: true },
     eventId: { type: String, required: true },
-    eventName: { type: String, required: true }
+    eventName: { type: String, required: true },
+    archive: { type: Boolean, default: false } 
 }, {
     timestamps: true
 });
