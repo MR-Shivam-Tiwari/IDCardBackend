@@ -31,6 +31,9 @@ mongoose.connect(process.env.MONGODB_URI, {
     console.log('MongoDB connected');
 })
 .catch(err => console.log(err));
+app.use("/", (req,res) =>{
+    res.send("Hello Shivam")
+})
 
 app.use('/api/events', eventRouter);
 app.use('/api/participants', participant);
