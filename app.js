@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const eventRouter = require('./routes/events');
 const participant = require('./routes/participants');
-
+require('dotenv').config();
 const app = express();
 
 // Middleware
@@ -23,7 +23,7 @@ app.use('/uploads', express.static(uploadDir));
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect('mongodb+srv://shivamt2023:ft123shivam123@cluster0.7f9nqsk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
