@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -6,14 +7,17 @@ const path = require('path');
 const fs = require('fs');
 const eventRouter = require('./routes/events');
 const participant = require('./routes/participants');
-require('dotenv').config();
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(bodyParser.json({ limit: '10mb' })); // Adjust as per your requirement
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' })); // Adjust as per your requirement
-
+app.use(cors({
+    origin: '*', // Allows all origins
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  }));
+  
+// Configure body-parser with a larger limit
+app.use(bodyParser.json({ limit: '50mb' })); // Adjust limit as needed
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 // Multer setup with file size limit
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -35,7 +39,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use('/api/events', eventRouter);
 app.use('/api/participants', participant);
 
-app.use("/", (req,res) =>{
+app.use("/", (req,res) =>{ 
     res.send("Hello Shivam")
 })
 app.listen(PORT, () => {
